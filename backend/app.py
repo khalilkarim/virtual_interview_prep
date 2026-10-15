@@ -12,16 +12,19 @@ questions = [
     {"id": 6, "text": "Why are you looking for a new role?"},
 ]
 
+
 @app.get("/api/questions")
 def get_questions():
     return jsonify(questions)
+
 
 @app.get("/api/answers")
 def get_answers():
     conn = get_db()
     rows = conn.execute("SELECT * FROM answers").fetchall()
     conn.close()
-    return jsonify([dict(row) for row in rows])
+    return jsonify([dict(row) for row in rows]), 200
+
 
 @app.post("/api/answers")
 def add_answer():
@@ -35,7 +38,9 @@ def add_answer():
         return jsonify("error: answer text is required"), 400
 
     conn = get_db()
-    cur = conn.execute("INSERT INTO answers (question_id, text) VALUES (?, ?)", (question_id, text))
+    cur = conn.execute(
+        "INSERT INTO answers (question_id, text) VALUES (?, ?)", (question_id, text)
+    )
     conn.commit()
     new_id = cur.lastrowid
     conn.close()
@@ -47,10 +52,6 @@ def add_answer():
     }
 
     return jsonify(answer), 201
-
-
-
-
 
 
 if __name__ == "__main__":
